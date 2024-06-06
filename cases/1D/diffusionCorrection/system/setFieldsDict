@@ -1,0 +1,62 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.6                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      setFieldsDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+defaultFieldValues
+(
+    volScalarFieldValue alpha.cyclohexane 1
+    volScalarFieldValue CLVEthylene 0
+    volScalarFieldValue CLVLEthylene 1
+    volScalarFieldValue CGVEthylene 1
+    volScalarFieldValue CLVCyclohexane 1000
+);
+
+regions
+(
+    boxToCell
+    {
+        box (0.003 0 0) (1 1 1);
+        fieldValues
+        (
+            volScalarFieldValue alpha.cyclohexane 0
+            
+        );
+    }
+
+    boxToCell
+    {
+        box (0.0005 0 0) (0.0015 1 1);
+        fieldValues
+        (
+            volScalarFieldValue CLVEthylene 1
+            volScalarFieldValue CLVLEthylene 1
+            volScalarFieldValue CGVEthylene 1
+            volScalarFieldValue CLVCyclohexane 1000
+        );
+    }
+    
+    boxToCell
+    {
+        box (0.003 0 0) (0.00302 1 1);
+        fieldValues
+        (
+            volScalarFieldValue alpha.cyclohexane 0.75
+
+        );
+    }
+);
+
+// ************************************************************************* //

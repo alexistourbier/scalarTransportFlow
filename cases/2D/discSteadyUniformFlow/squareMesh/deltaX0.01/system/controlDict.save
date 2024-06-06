@@ -1,0 +1,120 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  4.x                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     multiSpeciesTransferFlow;
+
+startFrom       latestTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         0.7;
+
+deltaT          1e-5;
+
+//writeControl    timeStep;
+writeControl    adjustableRunTime;
+
+//writeInterval   1;
+writeInterval   0.01;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  10;
+
+writeCompression no;
+
+timeFormat      general;
+
+timePrecision   10;
+
+runTimeModifiable yes;
+
+adjustTimeStep  yes;
+
+maxCo           0.1;
+
+maxAlphaCo      0.1;
+
+maxCapillaryNum 50;
+
+maxDeltaT       1;
+
+// ************************************************************************* //
+functions
+{
+    // **************************************************** //
+    // **** coded functionObject for droplet processing **** //
+    // **************************************************** //
+
+    maxDeviation
+        {
+            // Load the library containing the 'coded' functionObject
+            libs ("libutilityFunctionObjects.so");
+            type coded;
+            writeControl  timeStep;
+            writeInterval 1;
+            // Name of on-the-fly generated functionObject
+            name maxDeviation;
+            // List of include search directories
+            codeOptions
+            #{
+                -I$(LIB_SRC)/surfMesh/lnInclude 
+            #};
+            // List of libraries to link with
+            codeLibs
+            #{
+                -lsampling \
+                -lsurfMesh 
+            #};
+            // List of include files
+            // codeInclude
+            // #{
+            //     #include "sampledIsoSurfaceCell.H"
+            // #};
+            // Code
+            codeWrite
+            #{
+                Info << "--------------------------------" << endl;
+
+                // Concentration field
+                const volScalarField& Cliq = mesh().lookupObject<volScalarField>("CLVEthylene");
+
+                // volume fraction Field
+                const volScalarField& alpha = mesh().lookupObject<volScalarField>("alpha.cyclohexane");
+
+                // error analysis
+                scalar deviation = 0;
+                scalar bulkCell = 1;
+                scalar interfaceCell = 1;
+
+                forAll(alpha, cellI)
+                {
+                	deviation += mag(Cliq[cellI] - alpha[cellI]);
+                }
+
+
+            
+                Info << "deviation = " << deviation << endl;
+                //Info << "interfaceDeviation = " << interfaceDeviation << endl;
+                Info << "--------------------------------" << endl;
+            #};
+        }
+}

@@ -1,0 +1,23 @@
+#!/bin/sh
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
+
+runApplication blockMesh
+restore0Dir
+runApplication setFields
+
+application=$(getApplication)
+if [ `getNumberOfProcessors` -gt 1 ]; then
+  runApplication decomposePar -force
+  runParallel ${application}
+  rm -f log.reconstructPar
+  runApplication reconstructPar -noFunctionObjects
+else
+   runApplication ${application}
+fi
+
+echo "#Time    deviation" > deviation.dat
+grep -e '^Time =' -e '^deviation = ' log.multiSpeciesTransferFlow | awk -F'=' '/Time =/ {t=$NF} /deviation = / {print t"    "$NF}' >> deviation.dat
+
+echo "#Time    maxDeviation" > maxDeviation.dat
+grep -e '^Time =' -e '^maximum deviation = ' log.multiSpeciesTransferFlow | awk -F'=' '/Time =/ {t=$NF} /maximum deviation = / {print t"    "$NF}' >> maxDeviation.dat
